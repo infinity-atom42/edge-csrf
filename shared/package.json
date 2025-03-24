@@ -3,8 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "tsc",
     "lint": "eslint \"./src/**/*.ts{,x}\"",
     "test": "vitest",
-    "test-all": "vitest run --environment node && vitest run --environment edge-runtime && vitest run --environment miniflare"
-	}
+    "test-all": "vitest run --environment node && vitest run && vitest run --config vite.worker.config"
+  }
 }

@@ -1,10 +1,10 @@
 /// <reference types="vitest" />
 import { resolve } from 'path';
-import { defineConfig } from 'vite';
+import { defineWorkersConfig } from "@cloudflare/vitest-pool-workers/config";
 
 import dts from '../../shared/src/vite-plugin-dts';
 
-export default defineConfig({
+export default defineWorkersConfig({
   resolve: {
     alias: {
       '@shared': resolve(__dirname, '../../shared/src'),
@@ -16,15 +16,18 @@ export default defineConfig({
       entry: [
         resolve(__dirname, 'src/index.ts'),
       ],
-      name: '@edge-csrf/nextjs',
+      name: '@edge-csrf/sveltekit',
       formats: ['es', 'cjs'],
-    },
-    rollupOptions: {
-      external: ['next/server', 'react', 'react-dom'],
     },
   },
   test: {
-    environment: 'edge-runtime',
-    globals: true,
+    poolOptions: {
+      workers: {
+        miniflare: {
+          compatibilityDate: "2023-01-01",
+        }
+      }
+    },
+    globals: true
   },
 });

@@ -19,9 +19,6 @@ export default defineConfig({
       name: '@edge-csrf/sveltekit',
       formats: ['es', 'cjs'],
     },
-    rollupOptions: {
-      external: [],
-    },
   },
   test: {
     environment: 'edge-runtime',

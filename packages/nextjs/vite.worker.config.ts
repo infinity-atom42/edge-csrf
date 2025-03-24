@@ -1,10 +1,10 @@
 /// <reference types="vitest" />
 import { resolve } from 'path';
-import { defineConfig } from 'vite';
+import { defineWorkersConfig } from "@cloudflare/vitest-pool-workers/config";
 
 import dts from '../../shared/src/vite-plugin-dts';
 
-export default defineConfig({
+export default defineWorkersConfig({
   resolve: {
     alias: {
       '@shared': resolve(__dirname, '../../shared/src'),
@@ -24,7 +24,13 @@ export default defineConfig({
     },
   },
   test: {
-    environment: 'edge-runtime',
-    globals: true,
+    poolOptions: {
+      workers: {
+        miniflare: {
+          compatibilityDate: "2023-01-01",
+        }
+      }
+    },
+    globals: true
   },
 });

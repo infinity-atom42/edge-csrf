@@ -14,8 +14,7 @@ class Cookies {
     return this.jar[name];
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  set(name: string, value: string, _: any) {
+  set(name: string, value: string) {
     this.jar[name] = value;
   }
 }
@@ -49,7 +48,7 @@ describe('csrfProtect integration tests', () => {
       headers: { 'content-type': 'application/x-www-form-urlencoded' },
       body: `csrf_token=${encodeURIComponent(util.utoa(tokenUint8))}`,
     });
-    event.cookies.set('_csrfSecret', util.utoa(secretUint8), null);
+    event.cookies.set('_csrfSecret', util.utoa(secretUint8));
 
     await csrfProtectDefault(event);
 
@@ -67,7 +66,7 @@ describe('csrfProtect integration tests', () => {
       method: 'POST',
       headers: { 'x-csrf-token': util.utoa(token) },
     });
-    event.cookies.set('_csrfSecret', util.utoa(secret), null);
+    event.cookies.set('_csrfSecret', util.utoa(secret));
 
     await csrfProtectDefault(event);
 
@@ -89,7 +88,7 @@ describe('csrfProtect integration tests', () => {
       method: 'POST',
       body: formData,
     });
-    event.cookies.set('_csrfSecret', util.utoa(secret), null);
+    event.cookies.set('_csrfSecret', util.utoa(secret));
 
     await csrfProtectDefault(event);
 
@@ -108,7 +107,7 @@ describe('csrfProtect integration tests', () => {
       headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify([util.utoa(token), 'arg']),
     });
-    event.cookies.set('_csrfSecret', util.utoa(secret), null);
+    event.cookies.set('_csrfSecret', util.utoa(secret));
 
     await csrfProtectDefault(event);
 
@@ -127,7 +126,7 @@ describe('csrfProtect integration tests', () => {
       method: 'POST',
       headers: { 'x-csrf-token': util.utoa(token) },
     });
-    event.cookies.set('_csrfSecret', util.utoa(goodSecret), null);
+    event.cookies.set('_csrfSecret', util.utoa(goodSecret));
 
     await expect(csrfProtectDefault(event)).rejects.toThrow(CsrfError);
   });
@@ -139,7 +138,7 @@ describe('csrfProtect integration tests', () => {
       method: 'POST',
       headers: { 'x-csrf-token': btoa(String.fromCharCode(100)) },
     });
-    event.cookies.set('_csrfSecret', util.utoa(secret), null);
+    event.cookies.set('_csrfSecret', util.utoa(secret));
 
     await expect(csrfProtectDefault(event)).rejects.toThrow(CsrfError);
   });
@@ -151,7 +150,7 @@ describe('csrfProtect integration tests', () => {
       method: 'POST',
       headers: { 'x-csrf-token': '-' },
     });
-    event.cookies.set('_csrfSecret', util.utoa(secret), null);
+    event.cookies.set('_csrfSecret', util.utoa(secret));
 
     await expect(csrfProtectDefault(event)).rejects.toThrow(CsrfError);
   });
@@ -160,7 +159,7 @@ describe('csrfProtect integration tests', () => {
     const secret = util.createSecret(8);
 
     const event = new RequestEvent('http://example.com', { method: 'POST' });
-    event.cookies.set('_csrfSecret', util.utoa(secret), null);
+    event.cookies.set('_csrfSecret', util.utoa(secret));
 
     await expect(csrfProtectDefault(event)).rejects.toThrow(CsrfError);
   });
@@ -172,7 +171,7 @@ describe('csrfProtect integration tests', () => {
       method: 'POST',
       headers: { 'x-csrf-token': '' },
     });
-    event.cookies.set('_csrfSecret', util.utoa(secret), null);
+    event.cookies.set('_csrfSecret', util.utoa(secret));
 
     await expect(csrfProtectDefault(event)).rejects.toThrow(CsrfError);
   });
@@ -185,7 +184,7 @@ describe('csrfProtect integration tests', () => {
       method: 'POST',
       headers: { 'x-csrf-token': util.utoa(token) },
     });
-    event.cookies.set('_csrfSecret', '-', null);
+    event.cookies.set('_csrfSecret', '-');
 
     await expect(csrfProtectDefault(event)).rejects.toThrow(CsrfError);
   });
@@ -198,7 +197,7 @@ describe('csrfProtect integration tests', () => {
       method: 'POST',
       headers: { 'x-csrf-token': util.utoa(token) },
     });
-    event.cookies.set('_csrfSecret', btoa(String.fromCharCode(100)), null);
+    event.cookies.set('_csrfSecret', btoa(String.fromCharCode(100)));
 
     await expect(csrfProtectDefault(event)).rejects.toThrow(CsrfError);
   });
@@ -223,7 +222,7 @@ describe('csrfProtect integration tests', () => {
       method: 'POST',
       headers: { 'x-csrf-token': util.utoa(token) },
     });
-    event.cookies.set('_csrfSecret', '', null);
+    event.cookies.set('_csrfSecret', '');
 
     await expect(csrfProtectDefault(event)).rejects.toThrow(CsrfError);
   });
@@ -237,10 +236,33 @@ describe('obtaining secrets tests', () => {
 
     it.each(methods)('%s request', async (method) => {
       const event = new RequestEvent('http://example.com', { method });
+      
+      // For POST requests, we need to set up a valid token
+      if (method === 'POST') {
+        // First, handle a GET request to create a secret
+        const setupEvent = new RequestEvent('http://example.com', { method: 'GET' });
+        await csrfProtectDefault(setupEvent);
+        
+        // Get the secret that was set
+        const secretStr = setupEvent.cookies.get('_csrfSecret');
+        
+        // Set the secret in the test event
+        event.cookies.set('_csrfSecret', secretStr);
+        
+        // Create a token and include it in the request
+        const secret = util.atou(secretStr!);
+        const token = await util.createToken(secret, 8);
+        
+        // Add the token to the request headers
+        event.request = new Request('http://example.com', {
+          method: 'POST',
+          headers: { 'x-csrf-token': util.utoa(token) }
+        });
+      }
 
       try {
         await csrfProtectDefault(event);
-      } catch (err) {
+      } finally {
         // do nothing
       }
 
@@ -254,11 +276,24 @@ describe('obtaining secrets tests', () => {
 
     it.each(methods)('%s request', async (method) => {
       const event = new RequestEvent('http://example.com', { method });
-      event.cookies.set('_csrfSecret', secretStr, null);
+      event.cookies.set('_csrfSecret', secretStr);
+      
+      // For POST requests, we need to set up a valid token
+      if (method === 'POST') {
+        // Create a token and include it in the request
+        const secret = util.atou(secretStr);
+        const token = await util.createToken(secret, 8);
+        
+        // Add the token to the request headers
+        event.request = new Request('http://example.com', {
+          method: 'POST',
+          headers: { 'x-csrf-token': util.utoa(token) }
+        });
+      }
 
       try {
         await csrfProtectDefault(event);
-      } catch (err) {
+      } finally {
         // do nothing
       }
 

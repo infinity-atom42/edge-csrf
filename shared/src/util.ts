@@ -113,7 +113,7 @@ export async function getTokenString(request: Request, tokenOpts: TokenOptions =
       }
 
       return args0;
-    } catch (e) {
+    } catch {
       return rawVal;
     }
   }
@@ -123,9 +123,8 @@ export async function getTokenString(request: Request, tokenOpts: TokenOptions =
 
 /**
  * Create new salt
- * @param {int} length - Salt length in number of bytes
+ * @param {int} byteLength - Salt length in number of bytes
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function _createSalt(byteLength: number): Uint8Array {
   const salt = new Uint8Array(byteLength);
   for (let i = 0; i < byteLength; i += 1) {
@@ -139,7 +138,6 @@ export function _createSalt(byteLength: number): Uint8Array {
  * @param {Uint8Array} secret - The secret
  * @param {Uint8Array} salt - The salt
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export async function _hash(secret: Uint8Array, salt: Uint8Array): Promise<Uint8Array> {
   const data = new Uint8Array(secret.byteLength + salt.byteLength);
   data.set(secret);

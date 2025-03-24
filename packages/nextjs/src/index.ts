@@ -1,12 +1,14 @@
 import type { NextRequest } from 'next/server';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
 
 import { Config, TokenOptions } from '@shared/config';
 import type { ConfigOptions } from '@shared/config';
 import { CsrfError, createCsrfProtect as _createCsrfProtect } from '@shared/protect';
+import { Csrf, useCsrfToken } from './client';
+import { CsrfProvider } from './provider';
 
-export { CsrfError };
+export { CsrfError, Csrf, useCsrfToken, CsrfProvider };
 
 /**
  * Represents token options in config
@@ -95,4 +97,14 @@ export function createCsrfMiddleware(opts?: Partial<NextConfigOptions>) {
 
     return response;
   };
+}
+
+/**
+ * Get CSRF token from request headers
+ */
+export async function getCsrfToken() {
+  const headersList = await headers();
+  const csrfToken = headersList.get('X-CSRF-Token') || 'missing';
+
+  return csrfToken;
 }

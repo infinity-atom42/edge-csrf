@@ -161,7 +161,10 @@ describe('getTokenString', () => {
       body: JSON.stringify({ 'custom-token-name': 'my-token' }),
     });
     const tokenOpts = new TokenOptions({
-      value: async (request: Request) => (await request.json())['custom-token-name'],
+      value: async (request: Request) => {
+        const json = await request.json() as Record<string, string>;
+        return json['custom-token-name'];
+      },
     });
     const tokenStr = await util.getTokenString(requestOuter, tokenOpts);
     expect(tokenStr).toEqual('my-token');

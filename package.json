@@ -1,5 +1,6 @@
 {
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "pnpm -r build",
     "clean": "pnpm -r exec rm -rf node_modules",
@@ -8,19 +9,17 @@
     "test-all": "pnpm -r test-all"
   },
   "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.8.4",
+    "@cloudflare/workers-types": "^4.20250321.0",
     "@edge-runtime/vm": "^3.2.0",
-    "@types/jest": "^29.5.14",
-    "@types/node": "^20.17.1",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
-    "eslint": "^8.57.1",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-airbnb-typescript": "^18.0.0",
-    "tsup": "^8.3.4",
-    "typescript": "^5.6.3",
-    "vite": "^5.4.10",
-    "vitest": "^1.6.0",
-    "vitest-environment-miniflare": "^2.14.4"
+    "@types/node": "^20.17.26",
+    "@typescript-eslint/eslint-plugin": "^8.27.0",
+    "eslint": "^9.23.0",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.27.0",
+    "vite": "^6.2.3",
+    "vitest": "^3.0.0"
   },
-  "packageManager": "pnpm@9.12.2+sha512.22721b3a11f81661ae1ec68ce1a7b879425a1ca5b991c975b074ac220b187ce56c708fe5db69f4c962c989452eee76c82877f4ee80f474cebd61ee13461b6228"
+  "packageManager": "pnpm@10.6.5+sha512.cdf928fca20832cd59ec53826492b7dc25dc524d4370b6b4adbf65803d32efaa6c1c88147c0ae4e8d579a6c9eec715757b50d4fa35eea179d868eada4ed043af"
 }
